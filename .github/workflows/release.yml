@@ -1,0 +1,37 @@
+name: Package and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  package_and_release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Create ZIP package
+      run: |
+        mkdir -p packages
+        zip -r packages/tests.zip modules/servers/tests
+
+    - name: Create TAR.GZ package
+      run: |
+        tar -czvf packages/tests.tar.gz modules/servers/tests
+
+    - name: Upload Release Assets
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: |
+          packages/tests.zip
+          packages/tests.tar.gz
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref }}
+        name: Release ${{ github.ref }}
+        body: |
+          Release for ${{ github.ref }}
+        draft: false
+        prerelease: false
